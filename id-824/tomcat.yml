@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+  labels:
+    app: tomcat
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      containers:
+        - name: tomcat
+          image: tomcat:9
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: app-volume
+              mountPath: /usr/local/tomcat/webapps/
+      volumes:
+        - name: app-volume
+          configMap:
+            name: app-bundle
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat
+  labels:
+    app: tomcat
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+  selector:
+    app: tomcat
+  type: LoadBalancer
